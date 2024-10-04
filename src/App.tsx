@@ -5,6 +5,7 @@ import { GameAlreadyRunningError } from "./errors";
 import prettyBytes from "pretty-bytes";
 import { Game } from "./types/game";
 import { getGames } from "./games";
+import { capitalCase } from "change-case";
 
 const openGame = (game: Game) => {
   const { name } = game;
@@ -13,8 +14,8 @@ const openGame = (game: Game) => {
     throw new GameAlreadyRunningError(name);
   }
 
-  const gameWindow: WebviewWindow = new WebviewWindow("theUniqueLabel", {
-    url: "path/to/page.html",
+  const gameWindow: WebviewWindow = new WebviewWindow(name, {
+    url: "C:/test.html",
     title: game.name,
   });
 
@@ -26,8 +27,6 @@ const openGame = (game: Game) => {
     console.error(details);
   });
 };
-
-const downloadGame = () => {};
 
 const App: React.FC = () => {
   const [games, setGames] = useState<Game[]>([]);
@@ -43,17 +42,30 @@ const App: React.FC = () => {
     <>
       <ul>
         {games.length ? (
-          games.map((game) => (
-            <li key={game.name}>
-              <span>name: {game.name}</span>
-              <span>name: {prettyBytes(game.size)}</span>
-            </li>
-          ))
+          games.map((game) => {
+            const [noExtention] = game.name.split(".");
+            const formattedName: string = `${capitalCase(
+              noExtention
+            )} (${prettyBytes(game.size)})`;
+
+            return (
+              <li key={game.name} onClick={() => setSelectedGame(game)}>
+                <span>{formattedName}</span>
+              </li>
+            );
+          })
         ) : (
           <span>no games</span>
         )}
       </ul>
-      {selectedGame ?? <button className="open-game-btn">{}</button>}
+      {selectedGame && (
+        <button
+          className="open-game-btn"
+          onClick={() => openGame(selectedGame)}
+        >
+          Play {selectedGame.name}
+        </button>
+      )}
     </>
   );
 };

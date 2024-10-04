@@ -11,11 +11,11 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "minio": "^8.0.1",
+    "@aws-sdk/client-s3": "^3.665.0",
+    "change-case": "^5.4.4",
     "pretty-bytes": "^6.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "vite-plugin-node-polyfills": "^0.22.0",
     "yn": "^5.0.0",
     "zod": "^3.23.8"
   },
