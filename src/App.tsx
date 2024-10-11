@@ -5,18 +5,37 @@ import { GameAlreadyRunningError } from "./errors";
 import prettyBytes from "pretty-bytes";
 import { Game } from "./types/game";
 import { getGames } from "./games";
-import { capitalCase } from "change-case";
+import { capitalCase, snakeCase } from "change-case";
+import { getPreference } from "./preferences";
 
-const openGame = (game: Game) => {
-  const { name } = game;
+const downloadGame = (gameFileName: string) => {
+  throw new Error();
+};
 
-  if (WebviewWindow.getByLabel(name)) {
-    throw new GameAlreadyRunningError(name);
+const getGameURL = (gameFileName: string): string => {
+  const gamesPath: string = getPreference("gamesPath");
+  const isGameDownloaded: boolean = ((gameFileName: string): boolean => true)(
+    gameFileName
+  );
+  if (!isGameDownloaded) {
+    downloadGame(gameFileName);
   }
 
-  const gameWindow: WebviewWindow = new WebviewWindow(name, {
-    url: "C:/test.html",
-    title: game.name,
+  return `${gamesPath}/${gameFileName}`;
+};
+
+const openGame = (game: Game) => {
+  const [nameWithoutFileExtention] = game.name.split(".");
+  const gameLabel = snakeCase(nameWithoutFileExtention);
+  const formattedName = capitalCase(nameWithoutFileExtention);
+
+  if (WebviewWindow.getByLabel(gameLabel)) {
+    throw new GameAlreadyRunningError(formattedName);
+  }
+
+  const gameWindow: WebviewWindow = new WebviewWindow(gameLabel, {
+    url: getGameURL(game.name),
+    title: formattedName,
   });
 
   gameWindow.once("tauri://created", (details) => {
